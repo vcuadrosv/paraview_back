@@ -36,5 +36,20 @@ command = [
 ]
 
 # Ejecutar el comando
+# Directorio para logs
+log_dir = "/home/ubuntu/paraview_back/logs"
+os.makedirs(log_dir, exist_ok=True)
+
+stdout_path = os.path.join(log_dir, f"{project_name}_pvstdout.log")
+stderr_path = os.path.join(log_dir, f"{project_name}_pvstderr.log")
+
+with open(stdout_path, "w") as out, open(stderr_path, "w") as err:
+    process = subprocess.Popen(
+        command,
+        stdout=out,
+        stderr=err,
+        start_new_session=True  # 🔑 ESTO es lo que lo mantiene vivo
+    )
+
 print(f"✅ Iniciando visualización de: {vtk_dir}")
-subprocess.run(command)
+print(f"🔁 PID del servidor pvpython: {process.pid}")
