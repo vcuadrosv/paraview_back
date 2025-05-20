@@ -3,27 +3,28 @@ from flask_cors import CORS
 import subprocess
 import socket
 import os
-import psutil  # ← Necesitamos esta librería para gestionar procesos
+import psutil
+import time
 
 app = Flask(__name__)
-CORS(app)  # Permitir CORS para todas las rutas
+CORS(app)
 
-PORT_TO_KILL = 1234  # Puerto que usará ParaView
+PORT_TO_KILL = 1234  # Puerto que usa ParaView
+ACTIVE_PROJECTS = {}  # Mapeo: nombre_proyecto → PID
 
-def kill_process_on_port(port):
-    """Mata cualquier proceso que esté usando el puerto especificado."""
-    for conn in psutil.net_connections():
-        if conn.laddr.port == port:
-            pid = conn.pid
-            if pid:
-                try:
-                    p = psutil.Process(pid)
-                    print(f"🛑 Matando proceso {pid} que usa el puerto {port}...")
+def kill_process_on_port(port, exclude_pid=None):
+    """Mata procesos que usen el puerto, excepto uno opcional."""
+    for conn in psutil.net_connections(kind='inet'):
+        if conn.laddr.port == port and conn.pid:
+            try:
+                if conn.pid != exclude_pid:
+                    p = psutil.Process(conn.pid)
+                    print(f"🛑 Matando proceso {p.pid} en puerto {port}...")
                     p.terminate()
                     p.wait(timeout=3)
                     print("✅ Proceso terminado.")
-                except Exception as e:
-                    print(f"⚠️ No se pudo terminar el proceso {pid}: {e}")
+            except Exception as e:
+                print(f"⚠️ No se pudo terminar el proceso {conn.pid}: {e}")
 
 @app.route('/start', methods=['POST'])
 def start_backend():
@@ -35,19 +36,23 @@ def start_backend():
         return jsonify({
             'status': 'error',
             'message': 'Faltan parámetros: presión o velocidad'
-        })
+        }), 400
 
-    # Generar nombre del proyecto
     project = f"p_{pressure}_v{velocity}"
     print(f"🚀 Ejecutando app.py con proyecto: {project}")
 
-    # Matar cualquier proceso que use el puerto antes de lanzar
-    kill_process_on_port(PORT_TO_KILL)
+    if project in ACTIVE_PROJECTS:
+        return jsonify({
+            'status': 'ok',
+            'message': f'{project} ya está en ejecución con PID {ACTIVE_PROJECTS[project]}'
+        })
+
+    log_dir = "/home/ubuntu/paraview_back/logs"
+    os.makedirs(log_dir, exist_ok=True)
 
     try:
-        
-        log_dir = "/home/ubuntu/paraview_back/logs"
-        os.makedirs(log_dir, exist_ok=True)
+        # Mata cualquier otro proceso en ese puerto excepto este mismo script
+        kill_process_on_port(PORT_TO_KILL, exclude_pid=os.getpid())
 
         stdout_log = open(os.path.join(log_dir, f"{project}_stdout.log"), "w")
         stderr_log = open(os.path.join(log_dir, f"{project}_stderr.log"), "w")
@@ -58,6 +63,7 @@ def start_backend():
             stderr=stderr_log
         )
 
+        ACTIVE_PROJECTS[project] = process.pid
         print(f"✅ Lanzado app_ec2.py con PID {process.pid}")
 
         return jsonify({
@@ -68,7 +74,7 @@ def start_backend():
         return jsonify({
             'status': 'error',
             'message': str(e)
-        })
+        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)
