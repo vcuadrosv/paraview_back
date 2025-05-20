@@ -44,25 +44,18 @@ def start_backend():
     kill_process_on_port(PORT_TO_KILL)
 
     try:
-        result = subprocess.run(
-            ['python', 'app_ec2.py', project], #app.py para local y app_ec2.py para ec2.
-            capture_output=True,
-            text=True
+        process = subprocess.Popen(
+            ['python3', 'app_ec2.py', project],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
 
-        print("📤 STDOUT:\n", result.stdout)
-        print("📥 STDERR:\n", result.stderr)
+        print(f"✅ Lanzado app_ec2.py con PID {process.pid}")
 
-        if result.returncode == 0:
-            return jsonify({
-                'status': 'ok',
-                'message': f'app.py ejecutado con proyecto {project}'
-            })
-        else:
-            return jsonify({
-                'status': 'error',
-                'message': f'Error al ejecutar app.py:\n{result.stderr}'
-            })
+        return jsonify({
+            'status': 'ok',
+            'message': f'app.py ejecutado con proyecto {project}, PID {process.pid}'
+        })
     except Exception as e:
         return jsonify({
             'status': 'error',
