@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import subprocess
 import socket
+import os
 import psutil  # ← Necesitamos esta librería para gestionar procesos
 
 app = Flask(__name__)
@@ -44,10 +45,17 @@ def start_backend():
     kill_process_on_port(PORT_TO_KILL)
 
     try:
+        
+        log_dir = "/home/ubuntu/paraview_back/logs"
+        os.makedirs(log_dir, exist_ok=True)
+
+        stdout_log = open(os.path.join(log_dir, f"{project}_stdout.log"), "w")
+        stderr_log = open(os.path.join(log_dir, f"{project}_stderr.log"), "w")
+
         process = subprocess.Popen(
             ['python3', 'app_ec2.py', project],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stdout=stdout_log,
+            stderr=stderr_log
         )
 
         print(f"✅ Lanzado app_ec2.py con PID {process.pid}")
