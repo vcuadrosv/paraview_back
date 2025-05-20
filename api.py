@@ -42,10 +42,14 @@ def start_backend():
     print(f"🚀 Ejecutando app.py con proyecto: {project}")
 
     if project in ACTIVE_PROJECTS:
-        return jsonify({
-            'status': 'ok',
-            'message': f'{project} ya está en ejecución con PID {ACTIVE_PROJECTS[project]}'
-        })
+        pid = ACTIVE_PROJECTS[project]
+        if psutil.pid_exists(pid):
+            return jsonify({
+                'status': 'ok',
+                'message': f'{project} ya está en ejecución con PID {pid}'
+            })
+        else:
+            del ACTIVE_PROJECTS[project]
 
     log_dir = "/home/ubuntu/paraview_back/logs"
     os.makedirs(log_dir, exist_ok=True)
@@ -58,9 +62,10 @@ def start_backend():
         stderr_log = open(os.path.join(log_dir, f"{project}_stderr.log"), "w")
 
         process = subprocess.Popen(
-            ['python3', 'app_ec2.py', project],
+            ['nohup', 'python3', 'app_ec2.py', project],
             stdout=stdout_log,
-            stderr=stderr_log
+            stderr=stderr_log,
+            start_new_session=True
         )
 
         ACTIVE_PROJECTS[project] = process.pid
