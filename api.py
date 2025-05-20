@@ -62,11 +62,13 @@ def start_backend():
         stderr_log = open(os.path.join(log_dir, f"{project}_stderr.log"), "w")
 
         process = subprocess.Popen(
-            ['nohup', 'python3', 'app_ec2.py', project],
+            ['python3', 'app_ec2.py', project],
             stdout=stdout_log,
             stderr=stderr_log,
             start_new_session=True
         )
+        stdout_log.close()
+        stderr_log.close()
 
         ACTIVE_PROJECTS[project] = process.pid
         print(f"✅ Lanzado app_ec2.py con PID {process.pid}")
