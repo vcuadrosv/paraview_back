@@ -61,7 +61,7 @@ command = [
     "--data", vtk_dir,
     "--host", "0.0.0.0"
 ]
-
+print(f"Comando: {command}")
 # Directorio para logs
 log_dir = "~/paraview_back/logs"
 os.makedirs(log_dir, exist_ok=True)
