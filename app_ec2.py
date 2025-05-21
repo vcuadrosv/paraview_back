@@ -53,7 +53,7 @@ if os.path.exists(x_lock):
 
 # Comando para ejecutar ParaViewWeb Visualizer
 command = [
-    "xvfb-run", "--auto-servernum","--server-num=99","-s", "-screen 0 1024x768x24",
+    "xvfb-run", "-a","--server-args=-screen 0 1024x768x24",
     "/home/ubuntu/ParaView-5.11.0-MPI-Linux-Python3.9-x86_64/bin/pvpython",
     "/home/ubuntu/paraviewweb-visualizer/server/pvw-visualizer.py",
     "--content", "/home/ubuntu/paraviewweb-visualizer/dist",
