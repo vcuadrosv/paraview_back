@@ -58,17 +58,12 @@ def start_backend():
         # Mata cualquier otro proceso en ese puerto excepto este mismo script
         kill_process_on_port(PORT_TO_KILL, exclude_pid=os.getpid())
 
-        stdout_log = open(os.path.join(log_dir, f"{project}_stdout.log"), "w")
-        stderr_log = open(os.path.join(log_dir, f"{project}_stderr.log"), "w")
-
         process = subprocess.Popen(
             ['python3', 'app_ec2.py', project],
-            stdout=stdout_log,
-            stderr=stderr_log,
+            stdout=None,  # Hereda del padre (salida a consola)
+            stderr=None,
             start_new_session=True
         )
-        stdout_log.close()
-        stderr_log.close()
 
         ACTIVE_PROJECTS[project] = process.pid
         print(f"✅ Lanzado app_ec2.py con PID {process.pid}")
