@@ -10,7 +10,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 project_name = sys.argv[1]
-base_dir = f"~/Simulaciones/{project_name}"
+base_dir = f"/home/ubuntu/Simulaciones/{project_name}"
 vtk_dir = os.path.join(base_dir, "VTK")
 pid_file = "/tmp/paraviewweb.pid"
 
