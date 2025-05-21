@@ -71,6 +71,7 @@ stderr_path = os.path.join(log_dir, f"{project_name}_pvstderr.log")
 
 # Ejecutar el comando
 with open(stdout_path, "w") as out, open(stderr_path, "w") as err:
+    print(f"Comando: {command}")
     process = subprocess.Popen(
         command,
         stdout=out,
