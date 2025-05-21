@@ -10,7 +10,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 project_name = sys.argv[1]
-base_dir = f"/home/ubuntu/Simulaciones/{project_name}"
+base_dir = f"~/Simulaciones/{project_name}"
 vtk_dir = os.path.join(base_dir, "VTK")
 pid_file = "/tmp/paraviewweb.pid"
 
@@ -54,16 +54,16 @@ if os.path.exists(x_lock):
 # Comando para ejecutar ParaViewWeb Visualizer
 command = [
     "xvfb-run", "-s", "-screen 0 1024x768x24",
-    "/home/ubuntu/ParaView-5.11.0-MPI-Linux-Python3.9-x86_64/bin/pvpython",
-    "/home/ubuntu/paraviewweb-visualizer/server/pvw-visualizer.py",
-    "--content", "/home/ubuntu/paraviewweb-visualizer/dist",
+    "~/ParaView-5.11.0-MPI-Linux-Python3.9-x86_64/bin/pvpython",
+    "~/paraviewweb-visualizer/server/pvw-visualizer.py",
+    "--content", "~/paraviewweb-visualizer/dist",
     "--port", "1234",
     "--data", vtk_dir,
     "--host", "0.0.0.0"
 ]
 
 # Directorio para logs
-log_dir = "/home/ubuntu/paraview_back/logs"
+log_dir = "~/paraview_back/logs"
 os.makedirs(log_dir, exist_ok=True)
 
 stdout_path = os.path.join(log_dir, f"{project_name}_pvstdout.log")
